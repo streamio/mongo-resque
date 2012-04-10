@@ -18,14 +18,18 @@ module Resque
   extend self
   @delayed_queues = []
   
+  attr_accessor :delayed_queues
+  
   # Set the queue database. Expects a Mongo::DB object.
   def mongo=(database)
-    if database.is_a?(Mongo::DB)
+    if database.is_a? Mongo::DB
       @mongo = database
-      initialize_mongo
+    elsif database.is_a? String
+      @mongo = Mongo::Connection.new.db(database)
     else
-      raise ArgumentError, "Resque.mongo= expects a Mongo::DB database, not a #{database.class}."
+      raise ArgumentError, "Resque.mongo= expects a Mongo::DB database or a string representing the name of the database, not a #{database.class}."
     end
+    initialize_mongo
   end
 
   # Returns the current Mongo::DB. If none has been created, it will
@@ -158,6 +162,7 @@ module Resque
   def push(queue, item)
     queue = namespace_queue(queue)
     item[:resque_enqueue_timestamp] = Time.now
+    puts(item.inspect)
     mongo[queue] << item
   end
 
@@ -253,6 +258,10 @@ module Resque
   def remove_queue(queue)
     queue = namespace_queue(queue)
     mongo[queue].drop
+  end
+  
+  def clear_delayed_queues!
+    
   end
 
   #

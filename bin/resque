@@ -42,7 +42,7 @@ def queues
 end
 
 if (i = ARGV.index('-r')) && ARGV[i+1]
-  Resque.redis = ARGV[i+1]
+  Resque.mongo = ARGV[i+1]
   ARGV.delete_at(i)
   ARGV.delete_at(i+1)
 end
